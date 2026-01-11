@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "joQVd0nl3CA=",
+  "success": true,
+  "projectFilePath": "/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject/IconProject.csproj",
+  "expectedPackageFiles": [
+    "/Users/nickantoniadis/.nuget/packages/microsoft.aspnetcore.openapi/9.0.5/microsoft.aspnetcore.openapi.9.0.5.nupkg.sha512",
+    "/Users/nickantoniadis/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}

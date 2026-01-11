@@ -1,0 +1,7 @@
+﻿services:
+  iconproject:
+    image: iconproject
+    build:
+      context: .
+      dockerfile: IconProject/Dockerfile
+
