@@ -1,4 +1,4 @@
-namespace IconProject.Dtos;
+namespace IconProject.Common.Dtos;
 
 /// <summary>
 /// Represents the result of an operation that can either succeed or fail.

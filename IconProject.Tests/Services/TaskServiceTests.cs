@@ -1,6 +1,8 @@
-using FluentAssertions;
+using Shouldly;
+using IconProject.Common.Dtos.Requests.Task;
+using IconProject.Common.Dtos.Responses.Task;
+using IconProject.Common.Enums;
 using IconProject.Database.Models;
-using IconProject.Dtos.Task;
 using IconProject.Services;
 using IconProject.Tests.Fixtures;
 using Microsoft.Extensions.Logging;
@@ -38,9 +40,9 @@ public class TaskServiceTests : IDisposable
         var result = await service.GetAllByUserIdAsync(user.Id);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().HaveCount(3);
-        result.Value.Should().AllSatisfy(t => t.UserId.Should().Be(user.Id));
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Count.ShouldBe(3);
+        result.Value.ShouldAllBe(t => t.UserId == user.Id);
     }
 
     [Fact]
@@ -55,8 +57,8 @@ public class TaskServiceTests : IDisposable
         var result = await service.GetAllByUserIdAsync(user.Id);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().BeEmpty();
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeEmpty();
     }
 
     [Fact]
@@ -74,9 +76,110 @@ public class TaskServiceTests : IDisposable
         var result = await service.GetAllByUserIdAsync(user1.Id);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().HaveCount(2);
-        result.Value.Should().AllSatisfy(t => t.UserId.Should().Be(user1.Id));
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Count.ShouldBe(2);
+        result.Value.ShouldAllBe(t => t.UserId == user1.Id);
+    }
+
+    [Fact]
+    public async Task GetAllByUserIdAsync_WithIsCompleteFilter_ReturnsOnlyCompletedTasks()
+    {
+        // Arrange
+        var (unitOfWork, context) = MockUnitOfWorkFactory.Create();
+        var user = await MockUnitOfWorkFactory.SeedTestUserAsync(context);
+
+        context.Tasks.AddRange(
+            new TaskEntity { Title = "Complete 1", IsComplete = true, UserId = user.Id, Priority = Priority.Low },
+            new TaskEntity { Title = "Complete 2", IsComplete = true, UserId = user.Id, Priority = Priority.Low },
+            new TaskEntity { Title = "Incomplete 1", IsComplete = false, UserId = user.Id, Priority = Priority.Low }
+        );
+        await context.SaveChangesAsync();
+
+        var service = new TaskService(unitOfWork, _loggerMock.Object);
+
+        // Act
+        var result = await service.GetAllByUserIdAsync(user.Id, isComplete: true);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Count.ShouldBe(2);
+        result.Value.ShouldAllBe(t => t.IsComplete);
+    }
+
+    [Fact]
+    public async Task GetAllByUserIdAsync_WithIsCompleteFilterFalse_ReturnsOnlyIncompleteTasks()
+    {
+        // Arrange
+        var (unitOfWork, context) = MockUnitOfWorkFactory.Create();
+        var user = await MockUnitOfWorkFactory.SeedTestUserAsync(context);
+
+        context.Tasks.AddRange(
+            new TaskEntity { Title = "Complete 1", IsComplete = true, UserId = user.Id, Priority = Priority.Low },
+            new TaskEntity { Title = "Incomplete 1", IsComplete = false, UserId = user.Id, Priority = Priority.Low },
+            new TaskEntity { Title = "Incomplete 2", IsComplete = false, UserId = user.Id, Priority = Priority.Low }
+        );
+        await context.SaveChangesAsync();
+
+        var service = new TaskService(unitOfWork, _loggerMock.Object);
+
+        // Act
+        var result = await service.GetAllByUserIdAsync(user.Id, isComplete: false);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Count.ShouldBe(2);
+        result.Value.ShouldAllBe(t => !t.IsComplete);
+    }
+
+    [Fact]
+    public async Task GetAllByUserIdAsync_WithPriorityFilter_ReturnsOnlyMatchingPriorityTasks()
+    {
+        // Arrange
+        var (unitOfWork, context) = MockUnitOfWorkFactory.Create();
+        var user = await MockUnitOfWorkFactory.SeedTestUserAsync(context);
+
+        context.Tasks.AddRange(
+            new TaskEntity { Title = "High 1", IsComplete = false, UserId = user.Id, Priority = Priority.High },
+            new TaskEntity { Title = "High 2", IsComplete = false, UserId = user.Id, Priority = Priority.High },
+            new TaskEntity { Title = "Medium 1", IsComplete = false, UserId = user.Id, Priority = Priority.Medium },
+            new TaskEntity { Title = "Low 1", IsComplete = false, UserId = user.Id, Priority = Priority.Low }
+        );
+        await context.SaveChangesAsync();
+
+        var service = new TaskService(unitOfWork, _loggerMock.Object);
+
+        // Act
+        var result = await service.GetAllByUserIdAsync(user.Id, priority: Priority.High);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Count.ShouldBe(2);
+        result.Value.ShouldAllBe(t => t.Priority == Priority.High);
+    }
+
+    [Fact]
+    public async Task GetAllByUserIdAsync_WithBothFilters_ReturnsMatchingTasks()
+    {
+        // Arrange
+        var (unitOfWork, context) = MockUnitOfWorkFactory.Create();
+        var user = await MockUnitOfWorkFactory.SeedTestUserAsync(context);
+
+        context.Tasks.AddRange(
+            new TaskEntity { Title = "High Complete", IsComplete = true, UserId = user.Id, Priority = Priority.High },
+            new TaskEntity { Title = "High Incomplete", IsComplete = false, UserId = user.Id, Priority = Priority.High },
+            new TaskEntity { Title = "Low Complete", IsComplete = true, UserId = user.Id, Priority = Priority.Low }
+        );
+        await context.SaveChangesAsync();
+
+        var service = new TaskService(unitOfWork, _loggerMock.Object);
+
+        // Act
+        var result = await service.GetAllByUserIdAsync(user.Id, isComplete: true, priority: Priority.High);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Count.ShouldBe(1);
+        result.Value[0].Title.ShouldBe("High Complete");
     }
 
     #endregion
@@ -96,9 +199,9 @@ public class TaskServiceTests : IDisposable
         var result = await service.GetByIdAsync(tasks[0].Id, user.Id);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Id.Should().Be(tasks[0].Id);
-        result.Value.Title.Should().Be(tasks[0].Title);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Id.ShouldBe(tasks[0].Id);
+        result.Value.Title.ShouldBe(tasks[0].Title);
     }
 
     [Fact]
@@ -113,8 +216,8 @@ public class TaskServiceTests : IDisposable
         var result = await service.GetByIdAsync(999, user.Id);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("NotFound");
+        result.IsFailure.ShouldBeTrue();
+        result.Error.Code.ShouldContain("NotFound");
     }
 
     [Fact]
@@ -131,8 +234,8 @@ public class TaskServiceTests : IDisposable
         var result = await service.GetByIdAsync(tasks[0].Id, user2.Id);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("NotOwned");
+        result.IsFailure.ShouldBeTrue();
+        result.Error.Code.ShouldContain("NotOwned");
     }
 
     #endregion
@@ -157,16 +260,16 @@ public class TaskServiceTests : IDisposable
         var result = await service.CreateAsync(user.Id, request);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Title.Should().Be("New Task");
-        result.Value.Description.Should().Be("Task Description");
-        result.Value.Priority.Should().Be(Priority.High);
-        result.Value.IsComplete.Should().BeFalse();
-        result.Value.UserId.Should().Be(user.Id);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Title.ShouldBe("New Task");
+        result.Value.Description.ShouldBe("Task Description");
+        result.Value.Priority.ShouldBe(Priority.High);
+        result.Value.IsComplete.ShouldBeFalse();
+        result.Value.UserId.ShouldBe(user.Id);
 
         // Verify persisted
         var savedTask = await context.Tasks.FindAsync(result.Value.Id);
-        savedTask.Should().NotBeNull();
+        savedTask.ShouldNotBeNull();
     }
 
     [Fact]
@@ -181,8 +284,8 @@ public class TaskServiceTests : IDisposable
         var result = await service.CreateAsync(999, request);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("NotFound");
+        result.IsFailure.ShouldBeTrue();
+        result.Error.Code.ShouldContain("NotFound");
     }
 
     [Fact]
@@ -198,8 +301,8 @@ public class TaskServiceTests : IDisposable
         var result = await service.CreateAsync(user.Id, request);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Priority.Should().Be(Priority.Medium);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Priority.ShouldBe(Priority.Medium);
     }
 
     #endregion
@@ -227,12 +330,12 @@ public class TaskServiceTests : IDisposable
         var result = await service.UpdateAsync(tasks[0].Id, user.Id, request);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Title.Should().Be("Updated Title");
-        result.Value.Description.Should().Be("Updated Description");
-        result.Value.IsComplete.Should().BeTrue();
-        result.Value.Priority.Should().Be(Priority.High);
-        result.Value.SortOrder.Should().Be(10);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Title.ShouldBe("Updated Title");
+        result.Value.Description.ShouldBe("Updated Description");
+        result.Value.IsComplete.ShouldBeTrue();
+        result.Value.Priority.ShouldBe(Priority.High);
+        result.Value.SortOrder.ShouldBe(10);
     }
 
     [Fact]
@@ -253,8 +356,8 @@ public class TaskServiceTests : IDisposable
         var result = await service.UpdateAsync(999, user.Id, request);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("NotFound");
+        result.IsFailure.ShouldBeTrue();
+        result.Error.Code.ShouldContain("NotFound");
     }
 
     [Fact]
@@ -277,8 +380,8 @@ public class TaskServiceTests : IDisposable
         var result = await service.UpdateAsync(tasks[0].Id, user2.Id, request);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("NotOwned");
+        result.IsFailure.ShouldBeTrue();
+        result.Error.Code.ShouldContain("NotOwned");
     }
 
     #endregion
@@ -299,11 +402,11 @@ public class TaskServiceTests : IDisposable
         var result = await service.DeleteAsync(taskId, user.Id);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsSuccess.ShouldBeTrue();
 
         // Verify deleted
         var deletedTask = await context.Tasks.FindAsync(taskId);
-        deletedTask.Should().BeNull();
+        deletedTask.ShouldBeNull();
     }
 
     [Fact]
@@ -318,8 +421,8 @@ public class TaskServiceTests : IDisposable
         var result = await service.DeleteAsync(999, user.Id);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("NotFound");
+        result.IsFailure.ShouldBeTrue();
+        result.Error.Code.ShouldContain("NotFound");
     }
 
     [Fact]
@@ -336,12 +439,12 @@ public class TaskServiceTests : IDisposable
         var result = await service.DeleteAsync(tasks[0].Id, user2.Id);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("NotOwned");
+        result.IsFailure.ShouldBeTrue();
+        result.Error.Code.ShouldContain("NotOwned");
 
         // Verify not deleted
         var task = await context.Tasks.FindAsync(tasks[0].Id);
-        task.Should().NotBeNull();
+        task.ShouldNotBeNull();
     }
 
     #endregion
@@ -369,8 +472,8 @@ public class TaskServiceTests : IDisposable
         var result = await service.ToggleCompleteAsync(task.Id, user.Id);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.IsComplete.Should().BeTrue();
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.IsComplete.ShouldBeTrue();
     }
 
     [Fact]
@@ -394,8 +497,8 @@ public class TaskServiceTests : IDisposable
         var result = await service.ToggleCompleteAsync(task.Id, user.Id);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.IsComplete.Should().BeFalse();
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.IsComplete.ShouldBeFalse();
     }
 
     [Fact]
@@ -410,8 +513,8 @@ public class TaskServiceTests : IDisposable
         var result = await service.ToggleCompleteAsync(999, user.Id);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("NotFound");
+        result.IsFailure.ShouldBeTrue();
+        result.Error.Code.ShouldContain("NotFound");
     }
 
     #endregion
@@ -434,13 +537,13 @@ public class TaskServiceTests : IDisposable
         var result = await service.ReorderTasksAsync(user.Id, reorderedIds);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsSuccess.ShouldBeTrue();
 
         // Verify sort orders updated
         foreach (var (taskId, expectedSortOrder) in reorderedIds.Select((id, index) => (id, index)))
         {
             var task = await context.Tasks.FindAsync(taskId);
-            task!.SortOrder.Should().Be(expectedSortOrder);
+            task!.SortOrder.ShouldBe(expectedSortOrder);
         }
     }
 
@@ -456,7 +559,7 @@ public class TaskServiceTests : IDisposable
         var result = await service.ReorderTasksAsync(user.Id, new List<int>());
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsSuccess.ShouldBeTrue();
     }
 
     [Fact]
@@ -471,8 +574,8 @@ public class TaskServiceTests : IDisposable
         var result = await service.ReorderTasksAsync(user.Id, new List<int> { 999, 998 });
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("NotFound");
+        result.IsFailure.ShouldBeTrue();
+        result.Error.Code.ShouldContain("NotFound");
     }
 
     #endregion
@@ -492,14 +595,14 @@ public class TaskServiceTests : IDisposable
         var result = await service.GetPaginatedAsync(user.Id, page: 1, pageSize: 5);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Items.Should().HaveCount(5);
-        result.Value.TotalCount.Should().Be(10);
-        result.Value.Page.Should().Be(1);
-        result.Value.PageSize.Should().Be(5);
-        result.Value.TotalPages.Should().Be(2);
-        result.Value.HasNextPage.Should().BeTrue();
-        result.Value.HasPreviousPage.Should().BeFalse();
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Count.ShouldBe(5);
+        result.Value.TotalCount.ShouldBe(10);
+        result.Value.Page.ShouldBe(1);
+        result.Value.PageSize.ShouldBe(5);
+        result.Value.TotalPages.ShouldBe(2);
+        result.Value.HasNextPage.ShouldBeTrue();
+        result.Value.HasPreviousPage.ShouldBeFalse();
     }
 
     [Fact]
@@ -523,9 +626,9 @@ public class TaskServiceTests : IDisposable
         var result = await service.GetPaginatedAsync(user.Id, page: 1, pageSize: 10, isComplete: true);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Items.Should().HaveCount(2);
-        result.Value.Items.Should().AllSatisfy(t => t.IsComplete.Should().BeTrue());
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Count.ShouldBe(2);
+        result.Value.Items.ShouldAllBe(t => t.IsComplete);
     }
 
     #endregion

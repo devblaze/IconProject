@@ -1,71 +1,51 @@
 services:
-  # SQL Server Database for Development
-  db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: taskmanagement-db-dev
-    environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=YourStrong@Passw0rd
-      - MSSQL_PID=Express
-    ports:
-      - "1433:1433"
-    volumes:
-      - sqlserver-data-dev:/var/opt/mssql
-    healthcheck:
-      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "YourStrong@Passw0rd" -C -Q "SELECT 1" || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-    networks:
-      - taskmanagement-network-dev
-
-  # .NET Core Backend API (Development)
+  # .NET Core Backend API (Development with hot reload)
   backend:
-    build:
-      context: .
-      dockerfile: IconProject/Dockerfile
+    image: mcr.microsoft.com/dotnet/sdk:9.0
     container_name: taskmanagement-backend-dev
+    working_dir: /src
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Server=db;Database=TaskManagementDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - ASPNETCORE_URLS=http://+:5073
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+      - ConnectionStrings__DefaultConnection=Data Source=/src/data/iconproject.db
       - JwtSettings__SecretKey=YourSuperSecretKeyThatIsAtLeast32CharactersLong!
       - JwtSettings__Issuer=IconProject.Api
       - JwtSettings__Audience=IconProject.Client
       - JwtSettings__ExpirationInMinutes=60
     ports:
-      - "5073:8080"
-    depends_on:
-      db:
-        condition: service_healthy
+      - "5073:5073"
+    volumes:
+      - ./IconProject:/src/IconProject
+      - ./IconProject.Database:/src/IconProject.Database
+      - ./IconProject.Common:/src/IconProject.Common
+      - ./IconProject.sln:/src/IconProject.sln
+      - sqlite-data-dev:/src/data
+    command: dotnet watch run --project IconProject/IconProject.csproj --no-launch-profile
     networks:
       - taskmanagement-network-dev
-    volumes:
-      - ./IconProject:/src/IconProject:ro
-      - ./IconProject.Database:/src/IconProject.Database:ro
-      - ./IconProject.Common:/src/IconProject.Common:ro
 
   # React Frontend (Development with hot reload)
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
+    image: node:20-alpine
     container_name: taskmanagement-frontend-dev
+    working_dir: /app
     environment:
       - VITE_API_URL=http://localhost:5073
+      - CHOKIDAR_USEPOLLING=true
     ports:
       - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     depends_on:
       - backend
     networks:
       - taskmanagement-network-dev
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
 
 volumes:
-  sqlserver-data-dev:
+  sqlite-data-dev:
 
 networks:
   taskmanagement-network-dev:

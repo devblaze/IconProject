@@ -1,5 +1,6 @@
 using System.Security.Claims;
-using IconProject.Dtos.Auth;
+using IconProject.Common.Dtos.Requests.Auth;
+using IconProject.Common.Dtos.Responses.Auth;
 using IconProject.Extensions;
 using IconProject.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -7,9 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IconProject.Controllers;
 
-/// <summary>
-/// API controller for authentication operations.
-/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
@@ -21,13 +19,7 @@ public class AuthController : ControllerBase
     {
         _authService = authService;
     }
-
-    /// <summary>
-    /// Registers a new user.
-    /// </summary>
-    /// <param name="request">The registration request.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Authentication response with JWT token.</returns>
+    
     [HttpPost("register")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status201Created)]
@@ -43,13 +35,7 @@ public class AuthController : ControllerBase
             onSuccess: response => CreatedAtAction(nameof(GetCurrentUser), response),
             onFailure: _ => result.ToActionResult(Request.Path));
     }
-
-    /// <summary>
-    /// Authenticates a user and returns a JWT token.
-    /// </summary>
-    /// <param name="request">The login request.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Authentication response with JWT token.</returns>
+    
     [HttpPost("login")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
@@ -63,11 +49,7 @@ public class AuthController : ControllerBase
         return result.ToActionResult(Request.Path);
     }
 
-    /// <summary>
-    /// Gets the current authenticated user's information.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The current user's information.</returns>
+    // Gets the current authenticated user's information.
     [HttpGet("me")]
     [Authorize]
     [ProducesResponseType(typeof(UserInfo), StatusCodes.Status200OK)]

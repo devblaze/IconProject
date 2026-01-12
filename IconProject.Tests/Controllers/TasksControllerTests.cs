@@ -1,9 +1,10 @@
 using System.Security.Claims;
-using FluentAssertions;
+using Shouldly;
+using IconProject.Common.Dtos;
+using IconProject.Common.Dtos.Requests.Task;
+using IconProject.Common.Dtos.Responses.Task;
+using IconProject.Common.Enums;
 using IconProject.Controllers;
-using IconProject.Database.Models;
-using IconProject.Dtos;
-using IconProject.Dtos.Task;
 using IconProject.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -68,16 +69,38 @@ public class TasksControllerTests
             new() { Id = 2, Title = "Task 2", UserId = 1, Priority = Priority.High }
         };
         _taskServiceMock
-            .Setup(x => x.GetAllByUserIdAsync(1, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetAllByUserIdAsync(1, null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<IReadOnlyList<TaskResponse>>.Success(tasks));
 
         // Act
-        var result = await _controller.GetAll(CancellationToken.None);
+        var result = await _controller.GetAll(null, null, CancellationToken.None);
 
         // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedTasks = okResult.Value.Should().BeAssignableTo<IReadOnlyList<TaskResponse>>().Subject;
-        returnedTasks.Should().HaveCount(2);
+        var okResult = result.Result.ShouldBeOfType<OkObjectResult>();
+        var returnedTasks = okResult.Value.ShouldBeAssignableTo<IReadOnlyList<TaskResponse>>();
+        returnedTasks.Count.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task GetAll_WithIsCompleteFilter_PassesFilterToService()
+    {
+        // Arrange
+        var tasks = new List<TaskResponse>
+        {
+            new() { Id = 1, Title = "Task 1", UserId = 1, Priority = Priority.Low, IsComplete = true }
+        };
+        _taskServiceMock
+            .Setup(x => x.GetAllByUserIdAsync(1, true, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<IReadOnlyList<TaskResponse>>.Success(tasks));
+
+        // Act
+        var result = await _controller.GetAll(true, null, CancellationToken.None);
+
+        // Assert
+        _taskServiceMock.Verify(x => x.GetAllByUserIdAsync(1, true, null, It.IsAny<CancellationToken>()), Times.Once);
+        var okResult = result.Result.ShouldBeOfType<OkObjectResult>();
+        var returnedTasks = okResult.Value.ShouldBeAssignableTo<IReadOnlyList<TaskResponse>>();
+        returnedTasks.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -87,10 +110,32 @@ public class TasksControllerTests
         SetupUnauthenticatedContext();
 
         // Act
-        var result = await _controller.GetAll(CancellationToken.None);
+        var result = await _controller.GetAll(null, null, CancellationToken.None);
 
         // Assert
-        result.Result.Should().BeOfType<UnauthorizedResult>();
+        result.Result.ShouldBeOfType<UnauthorizedResult>();
+    }
+
+    [Fact]
+    public async Task GetAll_WithPriorityFilter_PassesFilterToService()
+    {
+        // Arrange
+        var tasks = new List<TaskResponse>
+        {
+            new() { Id = 1, Title = "Task 1", UserId = 1, Priority = Priority.High }
+        };
+        _taskServiceMock
+            .Setup(x => x.GetAllByUserIdAsync(1, null, Priority.High, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<IReadOnlyList<TaskResponse>>.Success(tasks));
+
+        // Act
+        var result = await _controller.GetAll(null, Priority.High, CancellationToken.None);
+
+        // Assert
+        _taskServiceMock.Verify(x => x.GetAllByUserIdAsync(1, null, Priority.High, It.IsAny<CancellationToken>()), Times.Once);
+        var okResult = result.Result.ShouldBeOfType<OkObjectResult>();
+        var returnedTasks = okResult.Value.ShouldBeAssignableTo<IReadOnlyList<TaskResponse>>();
+        returnedTasks.Count.ShouldBe(1);
     }
 
     #endregion
@@ -116,9 +161,9 @@ public class TasksControllerTests
         var result = await _controller.GetById(1, CancellationToken.None);
 
         // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedTask = okResult.Value.Should().BeOfType<TaskResponse>().Subject;
-        returnedTask.Id.Should().Be(1);
+        var okResult = result.Result.ShouldBeOfType<OkObjectResult>();
+        var returnedTask = okResult.Value.ShouldBeOfType<TaskResponse>();
+        returnedTask.Id.ShouldBe(1);
     }
 
     [Fact]
@@ -133,8 +178,8 @@ public class TasksControllerTests
         var result = await _controller.GetById(999, CancellationToken.None);
 
         // Assert
-        var objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        objectResult.StatusCode.Should().Be(404);
+        var objectResult = result.Result.ShouldBeOfType<ObjectResult>();
+        objectResult.StatusCode.ShouldBe(404);
     }
 
     [Fact]
@@ -149,8 +194,8 @@ public class TasksControllerTests
         var result = await _controller.GetById(1, CancellationToken.None);
 
         // Assert
-        var objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        objectResult.StatusCode.Should().Be(403);
+        var objectResult = result.Result.ShouldBeOfType<ObjectResult>();
+        objectResult.StatusCode.ShouldBe(403);
     }
 
     #endregion
@@ -183,10 +228,10 @@ public class TasksControllerTests
         var result = await _controller.Create(request, CancellationToken.None);
 
         // Assert
-        var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
-        createdResult.ActionName.Should().Be(nameof(TasksController.GetById));
-        var returnedTask = createdResult.Value.Should().BeOfType<TaskResponse>().Subject;
-        returnedTask.Title.Should().Be("New Task");
+        var createdResult = result.Result.ShouldBeOfType<CreatedAtActionResult>();
+        createdResult.ActionName.ShouldBe(nameof(TasksController.GetById));
+        var returnedTask = createdResult.Value.ShouldBeOfType<TaskResponse>();
+        returnedTask.Title.ShouldBe("New Task");
     }
 
     [Fact]
@@ -200,7 +245,7 @@ public class TasksControllerTests
         var result = await _controller.Create(request, CancellationToken.None);
 
         // Assert
-        result.Result.Should().BeOfType<UnauthorizedResult>();
+        result.Result.ShouldBeOfType<UnauthorizedResult>();
     }
 
     #endregion
@@ -233,10 +278,10 @@ public class TasksControllerTests
         var result = await _controller.Update(1, request, CancellationToken.None);
 
         // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedTask = okResult.Value.Should().BeOfType<TaskResponse>().Subject;
-        returnedTask.Title.Should().Be("Updated Task");
-        returnedTask.IsComplete.Should().BeTrue();
+        var okResult = result.Result.ShouldBeOfType<OkObjectResult>();
+        var returnedTask = okResult.Value.ShouldBeOfType<TaskResponse>();
+        returnedTask.Title.ShouldBe("Updated Task");
+        returnedTask.IsComplete.ShouldBeTrue();
     }
 
     [Fact]
@@ -257,8 +302,8 @@ public class TasksControllerTests
         var result = await _controller.Update(999, request, CancellationToken.None);
 
         // Assert
-        var objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        objectResult.StatusCode.Should().Be(404);
+        var objectResult = result.Result.ShouldBeOfType<ObjectResult>();
+        objectResult.StatusCode.ShouldBe(404);
     }
 
     #endregion
@@ -277,7 +322,7 @@ public class TasksControllerTests
         var result = await _controller.Delete(1, CancellationToken.None);
 
         // Assert
-        result.Should().BeOfType<NoContentResult>();
+        result.ShouldBeOfType<NoContentResult>();
     }
 
     [Fact]
@@ -292,8 +337,8 @@ public class TasksControllerTests
         var result = await _controller.Delete(999, CancellationToken.None);
 
         // Assert
-        var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
-        objectResult.StatusCode.Should().Be(404);
+        var objectResult = result.ShouldBeOfType<ObjectResult>();
+        objectResult.StatusCode.ShouldBe(404);
     }
 
     [Fact]
@@ -308,8 +353,8 @@ public class TasksControllerTests
         var result = await _controller.Delete(1, CancellationToken.None);
 
         // Assert
-        var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
-        objectResult.StatusCode.Should().Be(403);
+        var objectResult = result.ShouldBeOfType<ObjectResult>();
+        objectResult.StatusCode.ShouldBe(403);
     }
 
     #endregion
@@ -336,9 +381,9 @@ public class TasksControllerTests
         var result = await _controller.ToggleComplete(1, CancellationToken.None);
 
         // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedTask = okResult.Value.Should().BeOfType<TaskResponse>().Subject;
-        returnedTask.IsComplete.Should().BeTrue();
+        var okResult = result.Result.ShouldBeOfType<OkObjectResult>();
+        var returnedTask = okResult.Value.ShouldBeOfType<TaskResponse>();
+        returnedTask.IsComplete.ShouldBeTrue();
     }
 
     #endregion
@@ -358,7 +403,7 @@ public class TasksControllerTests
         var result = await _controller.Reorder(request, CancellationToken.None);
 
         // Assert
-        result.Should().BeOfType<NoContentResult>();
+        result.ShouldBeOfType<NoContentResult>();
     }
 
     [Fact]
@@ -374,8 +419,8 @@ public class TasksControllerTests
         var result = await _controller.Reorder(request, CancellationToken.None);
 
         // Assert
-        var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
-        objectResult.StatusCode.Should().Be(404);
+        var objectResult = result.ShouldBeOfType<ObjectResult>();
+        objectResult.StatusCode.ShouldBe(404);
     }
 
     #endregion
@@ -397,17 +442,17 @@ public class TasksControllerTests
             PageSize = 5
         };
         _taskServiceMock
-            .Setup(x => x.GetPaginatedAsync(1, 1, 5, null, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetPaginatedAsync(1, 1, 5, null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PaginatedTaskResponse>.Success(paginatedResponse));
 
         // Act
-        var result = await _controller.GetPaginated(1, 5, null, CancellationToken.None);
+        var result = await _controller.GetPaginated(1, 5, null, null, CancellationToken.None);
 
         // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var response = okResult.Value.Should().BeOfType<PaginatedTaskResponse>().Subject;
-        response.Items.Should().HaveCount(1);
-        response.TotalCount.Should().Be(10);
+        var okResult = result.Result.ShouldBeOfType<OkObjectResult>();
+        var response = okResult.Value.ShouldBeOfType<PaginatedTaskResponse>();
+        response.Items.Count.ShouldBe(1);
+        response.TotalCount.ShouldBe(10);
     }
 
     [Fact]
@@ -415,7 +460,7 @@ public class TasksControllerTests
     {
         // Arrange
         _taskServiceMock
-            .Setup(x => x.GetPaginatedAsync(1, 1, 10, true, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetPaginatedAsync(1, 1, 10, true, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PaginatedTaskResponse>.Success(new PaginatedTaskResponse
             {
                 Items = new List<TaskResponse>(),
@@ -425,10 +470,10 @@ public class TasksControllerTests
             }));
 
         // Act
-        await _controller.GetPaginated(1, 10, true, CancellationToken.None);
+        await _controller.GetPaginated(1, 10, true, null, CancellationToken.None);
 
         // Assert
-        _taskServiceMock.Verify(x => x.GetPaginatedAsync(1, 1, 10, true, It.IsAny<CancellationToken>()), Times.Once);
+        _taskServiceMock.Verify(x => x.GetPaginatedAsync(1, 1, 10, true, null, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     #endregion

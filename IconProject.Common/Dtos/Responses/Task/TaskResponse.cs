@@ -1,10 +1,7 @@
-using IconProject.Database.Models;
+using IconProject.Common.Enums;
 
-namespace IconProject.Dtos.Task;
+namespace IconProject.Common.Dtos.Responses.Task;
 
-/// <summary>
-/// Response DTO representing a task.
-/// </summary>
 public sealed record TaskResponse
 {
     public int Id { get; init; }
@@ -16,30 +13,8 @@ public sealed record TaskResponse
     public int UserId { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }
-
-    /// <summary>
-    /// Maps a TaskEntity to a TaskResponse.
-    /// </summary>
-    public static TaskResponse FromEntity(TaskEntity entity)
-    {
-        return new TaskResponse
-        {
-            Id = entity.Id,
-            Title = entity.Title,
-            Description = entity.Description,
-            IsComplete = entity.IsComplete,
-            Priority = entity.Priority,
-            SortOrder = entity.SortOrder,
-            UserId = entity.UserId,
-            CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt
-        };
-    }
 }
 
-/// <summary>
-/// Response DTO for paginated task results.
-/// </summary>
 public sealed record PaginatedTaskResponse
 {
     public required IReadOnlyList<TaskResponse> Items { get; init; }

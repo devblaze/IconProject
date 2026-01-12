@@ -1,6 +1,6 @@
 using System.Net;
 using System.Text.Json;
-using IconProject.Dtos;
+using IconProject.Common.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace IconProject.Middleware;
@@ -46,11 +46,9 @@ public class GlobalExceptionMiddleware
     {
         var path = context.Request.Path;
         var (statusCode, errorResponse) = MapException(exception, path);
-
-        // Log the exception
+        
         LogException(exception, statusCode, path);
-
-        // Include stack trace in development
+        
         if (_environment.IsDevelopment() && statusCode == (int)HttpStatusCode.InternalServerError)
         {
             errorResponse = errorResponse with { Details = exception.ToString() };
@@ -67,7 +65,6 @@ public class GlobalExceptionMiddleware
     {
         return exception switch
         {
-            // Validation exceptions
             ArgumentException argEx => (
                 (int)HttpStatusCode.BadRequest,
                 new ErrorResponse
@@ -77,13 +74,11 @@ public class GlobalExceptionMiddleware
                     StatusCode = (int)HttpStatusCode.BadRequest,
                     Path = path
                 }),
-
-            // Not found exceptions
+            
             KeyNotFoundException => (
                 (int)HttpStatusCode.NotFound,
                 ErrorResponse.NotFound("The requested resource was not found.", path)),
-
-            // Entity Framework exceptions
+            
             DbUpdateConcurrencyException => (
                 (int)HttpStatusCode.Conflict,
                 new ErrorResponse
@@ -95,15 +90,13 @@ public class GlobalExceptionMiddleware
                 }),
 
             DbUpdateException dbEx => HandleDbUpdateException(dbEx, path),
-
-            // Unauthorized access
+            
             UnauthorizedAccessException => (
                 (int)HttpStatusCode.Unauthorized,
                 ErrorResponse.Unauthorized(path: path)),
-
-            // Operation canceled (typically client disconnected)
+            
             OperationCanceledException => (
-                499, // Client Closed Request
+                499,
                 new ErrorResponse
                 {
                     Code = "Request.Cancelled",
@@ -111,8 +104,7 @@ public class GlobalExceptionMiddleware
                     StatusCode = 499,
                     Path = path
                 }),
-
-            // Invalid operation
+            
             InvalidOperationException invalidOpEx => (
                 (int)HttpStatusCode.BadRequest,
                 new ErrorResponse
@@ -122,8 +114,7 @@ public class GlobalExceptionMiddleware
                     StatusCode = (int)HttpStatusCode.BadRequest,
                     Path = path
                 }),
-
-            // Default - Internal server error
+            
             _ => (
                 (int)HttpStatusCode.InternalServerError,
                 ErrorResponse.InternalServerError(path: path))
@@ -133,8 +124,7 @@ public class GlobalExceptionMiddleware
     private (int StatusCode, ErrorResponse Response) HandleDbUpdateException(DbUpdateException exception, string path)
     {
         var innerMessage = exception.InnerException?.Message ?? exception.Message;
-
-        // Check for unique constraint violation
+        
         if (innerMessage.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) ||
             innerMessage.Contains("duplicate", StringComparison.OrdinalIgnoreCase) ||
             innerMessage.Contains("IX_", StringComparison.OrdinalIgnoreCase))
@@ -149,8 +139,7 @@ public class GlobalExceptionMiddleware
                     Path = path
                 });
         }
-
-        // Check for foreign key violation
+        
         if (innerMessage.Contains("FOREIGN KEY", StringComparison.OrdinalIgnoreCase) ||
             innerMessage.Contains("FK_", StringComparison.OrdinalIgnoreCase))
         {
@@ -194,14 +183,9 @@ public class GlobalExceptionMiddleware
     }
 }
 
-/// <summary>
-/// Extension methods for registering the GlobalExceptionMiddleware.
-/// </summary>
+// Extension methods for registering the GlobalExceptionMiddleware adds middleware to the Program.cs.
 public static class GlobalExceptionMiddlewareExtensions
 {
-    /// <summary>
-    /// Adds the global exception handling middleware to the application pipeline.
-    /// </summary>
     public static IApplicationBuilder UseGlobalExceptionHandler(this IApplicationBuilder app)
     {
         return app.UseMiddleware<GlobalExceptionMiddleware>();

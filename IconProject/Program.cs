@@ -14,16 +14,11 @@ using IconProject.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// =================================
-// Configuration
-// =================================
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
 var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
     ?? throw new InvalidOperationException("JwtSettings configuration is missing");
 
-// =================================
 // CORS Configuration
-// =================================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -39,15 +34,11 @@ builder.Services.AddCors(options =>
     });
 });
 
-// =================================
-// Add Controllers
-// =================================
+// Controllers
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// =================================
-// Swagger with JWT Support
-// =================================
+// Swagger
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -57,7 +48,7 @@ builder.Services.AddSwaggerGen(options =>
         Description = "A Task Management System API with JWT Authentication"
     });
 
-    // Add JWT Authentication to Swagger
+    // JWT Authentication to Swagger
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -84,9 +75,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// =================================
 // JWT Authentication
-// =================================
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -119,36 +108,26 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// =================================
-// Database Configuration
-// =================================
+// Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// =================================
-// Register Unit of Work Pattern
-// =================================
+// Unit of work
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// Register Generic Repository (for direct repository access if needed)
+// Generic repository
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
-// =================================
-// Register Application Services
-// =================================
+// Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 
 var app = builder.Build();
 
-// =================================
-// Global Exception Handling Middleware (must be first)
-// =================================
+
 app.UseGlobalExceptionHandler();
 
-// =================================
-// Migrate Automatically at Startup
-// =================================
+// Auto migrate
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -180,21 +159,12 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// =================================
-// Configure HTTP Request Pipeline
-// =================================
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 // app.UseHttpsRedirection();
-
-// CORS must be before Authentication
 app.UseCors("AllowFrontend");
 
-// Authentication & Authorization middleware (order matters!)
 app.UseAuthentication();
 app.UseAuthorization();
 

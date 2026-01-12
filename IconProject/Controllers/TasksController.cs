@@ -1,6 +1,7 @@
 using System.Security.Claims;
-using IconProject.Dtos;
-using IconProject.Dtos.Task;
+using IconProject.Common.Dtos.Requests.Task;
+using IconProject.Common.Dtos.Responses.Task;
+using IconProject.Common.Enums;
 using IconProject.Extensions;
 using IconProject.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -8,10 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IconProject.Controllers;
 
-/// <summary>
-/// API controller for task management operations.
-/// Requires JWT authentication for all endpoints.
-/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
@@ -24,40 +21,13 @@ public class TasksController : ControllerBase
     {
         _taskService = taskService;
     }
-
-    /// <summary>
-    /// Gets all tasks for the authenticated user.
-    /// </summary>
-    /// <returns>A list of tasks.</returns>
+    
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<TaskResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<IReadOnlyList<TaskResponse>>> GetAll(CancellationToken cancellationToken)
-    {
-        var userId = GetUserIdFromClaims();
-        if (userId is null)
-        {
-            return Unauthorized();
-        }
-
-        var result = await _taskService.GetAllByUserIdAsync(userId.Value, cancellationToken);
-        return result.ToActionResult(Request.Path);
-    }
-
-    /// <summary>
-    /// Gets paginated tasks for the authenticated user.
-    /// </summary>
-    /// <param name="page">Page number (default: 1).</param>
-    /// <param name="pageSize">Number of items per page (default: 10, max: 100).</param>
-    /// <param name="isComplete">Filter by completion status.</param>
-    /// <returns>Paginated task results.</returns>
-    [HttpGet("paginated")]
-    [ProducesResponseType(typeof(PaginatedTaskResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<PaginatedTaskResponse>> GetPaginated(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10,
+    public async Task<ActionResult<IReadOnlyList<TaskResponse>>> GetAll(
         [FromQuery] bool? isComplete = null,
+        [FromQuery] Priority? priority = null,
         CancellationToken cancellationToken = default)
     {
         var userId = GetUserIdFromClaims();
@@ -66,15 +36,30 @@ public class TasksController : ControllerBase
             return Unauthorized();
         }
 
-        var result = await _taskService.GetPaginatedAsync(userId.Value, page, pageSize, isComplete, cancellationToken);
+        var result = await _taskService.GetAllByUserIdAsync(userId.Value, isComplete, priority, cancellationToken);
         return result.ToActionResult(Request.Path);
     }
+    
+    [HttpGet("paginated")]
+    [ProducesResponseType(typeof(PaginatedTaskResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<PaginatedTaskResponse>> GetPaginated(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] bool? isComplete = null,
+        [FromQuery] Priority? priority = null,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = GetUserIdFromClaims();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
 
-    /// <summary>
-    /// Gets a specific task by ID.
-    /// </summary>
-    /// <param name="id">The task ID.</param>
-    /// <returns>The task details.</returns>
+        var result = await _taskService.GetPaginatedAsync(userId.Value, page, pageSize, isComplete, priority, cancellationToken);
+        return result.ToActionResult(Request.Path);
+    }
+    
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(TaskResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -91,12 +76,7 @@ public class TasksController : ControllerBase
         var result = await _taskService.GetByIdAsync(id, userId.Value, cancellationToken);
         return result.ToActionResult(Request.Path);
     }
-
-    /// <summary>
-    /// Creates a new task.
-    /// </summary>
-    /// <param name="request">The task creation request.</param>
-    /// <returns>The created task.</returns>
+    
     [HttpPost]
     [ProducesResponseType(typeof(TaskResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -120,13 +100,7 @@ public class TasksController : ControllerBase
                 task),
             onFailure: _ => result.ToActionResult(Request.Path));
     }
-
-    /// <summary>
-    /// Updates an existing task.
-    /// </summary>
-    /// <param name="id">The task ID.</param>
-    /// <param name="request">The update request.</param>
-    /// <returns>The updated task.</returns>
+    
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(TaskResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -147,11 +121,7 @@ public class TasksController : ControllerBase
         var result = await _taskService.UpdateAsync(id, userId.Value, request, cancellationToken);
         return result.ToActionResult(Request.Path);
     }
-
-    /// <summary>
-    /// Deletes a task.
-    /// </summary>
-    /// <param name="id">The task ID.</param>
+    
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -168,12 +138,7 @@ public class TasksController : ControllerBase
         var result = await _taskService.DeleteAsync(id, userId.Value, cancellationToken);
         return result.ToActionResult(Request.Path);
     }
-
-    /// <summary>
-    /// Toggles the completion status of a task.
-    /// </summary>
-    /// <param name="id">The task ID.</param>
-    /// <returns>The updated task.</returns>
+    
     [HttpPatch("{id:int}/toggle-complete")]
     [ProducesResponseType(typeof(TaskResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -190,11 +155,7 @@ public class TasksController : ControllerBase
         var result = await _taskService.ToggleCompleteAsync(id, userId.Value, cancellationToken);
         return result.ToActionResult(Request.Path);
     }
-
-    /// <summary>
-    /// Updates the sort order of multiple tasks (for drag-and-drop reordering).
-    /// </summary>
-    /// <param name="request">The sort order updates.</param>
+    
     [HttpPatch("sort-order")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -217,12 +178,7 @@ public class TasksController : ControllerBase
         var result = await _taskService.UpdateSortOrderAsync(userId.Value, sortOrders, cancellationToken);
         return result.ToActionResult(Request.Path);
     }
-
-    /// <summary>
-    /// Reorders tasks based on the provided array of task IDs (for drag-and-drop).
-    /// The sort order is determined by the position in the array.
-    /// </summary>
-    /// <param name="request">The reorder request containing task IDs in desired order.</param>
+    
     [HttpPut("reorder")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -254,29 +210,4 @@ public class TasksController : ControllerBase
 
         return null;
     }
-}
-
-/// <summary>
-/// Request DTO for updating task sort orders.
-/// </summary>
-public sealed record UpdateSortOrderRequest
-{
-    public required IReadOnlyList<SortOrderItem> Items { get; init; }
-}
-
-/// <summary>
-/// Individual sort order update item.
-/// </summary>
-public sealed record SortOrderItem
-{
-    public int TaskId { get; init; }
-    public int SortOrder { get; init; }
-}
-
-/// <summary>
-/// Request DTO for reordering tasks by providing task IDs in the desired order.
-/// </summary>
-public sealed record ReorderRequest
-{
-    public required IReadOnlyList<int> TaskIds { get; init; }
 }

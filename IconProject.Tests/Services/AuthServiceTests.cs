@@ -1,7 +1,7 @@
-using FluentAssertions;
+using Shouldly;
+using IconProject.Common.Dtos.Requests.Auth;
 using IconProject.Configuration;
 using IconProject.Database.Models;
-using IconProject.Dtos.Auth;
 using IconProject.Services;
 using IconProject.Tests.Fixtures;
 using Microsoft.Extensions.Logging;
@@ -53,17 +53,17 @@ public class AuthServiceTests : IDisposable
         var result = await service.RegisterAsync(request);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.AccessToken.Should().NotBeNullOrEmpty();
-        result.Value.User.Email.Should().Be("newuser@example.com");
-        result.Value.User.FirstName.Should().Be("John");
-        result.Value.User.LastName.Should().Be("Doe");
-        result.Value.ExpiresIn.Should().Be(3600); // 60 minutes in seconds
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.AccessToken.ShouldNotBeNullOrEmpty();
+        result.Value.User.Email.ShouldBe("newuser@example.com");
+        result.Value.User.FirstName.ShouldBe("John");
+        result.Value.User.LastName.ShouldBe("Doe");
+        result.Value.ExpiresIn.ShouldBe(3600); // 60 minutes in seconds
 
         // Verify user was saved
         var savedUser = context.Users.FirstOrDefault(u => u.Email == "newuser@example.com");
-        savedUser.Should().NotBeNull();
-        savedUser!.PasswordHash.Should().NotBe("password123"); // Should be hashed
+        savedUser.ShouldNotBeNull();
+        savedUser!.PasswordHash.ShouldNotBe("password123"); // Should be hashed
     }
 
     [Fact]
@@ -83,8 +83,8 @@ public class AuthServiceTests : IDisposable
         var result = await service.RegisterAsync(request);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("EmailAlreadyExists");
+        result.IsFailure.ShouldBeTrue();
+        result.Error.Code.ShouldContain("EmailAlreadyExists");
     }
 
     [Fact]
@@ -103,11 +103,11 @@ public class AuthServiceTests : IDisposable
         var result = await service.RegisterAsync(request);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.User.Email.Should().Be("user@example.com");
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.User.Email.ShouldBe("user@example.com");
 
         var savedUser = context.Users.FirstOrDefault();
-        savedUser!.Email.Should().Be("user@example.com");
+        savedUser!.Email.ShouldBe("user@example.com");
     }
 
     [Fact]
@@ -126,9 +126,9 @@ public class AuthServiceTests : IDisposable
         var result = await service.RegisterAsync(request);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.User.FirstName.Should().BeNull();
-        result.Value.User.LastName.Should().BeNull();
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.User.FirstName.ShouldBeNull();
+        result.Value.User.LastName.ShouldBeNull();
     }
 
     #endregion
@@ -162,11 +162,11 @@ public class AuthServiceTests : IDisposable
         var result = await service.LoginAsync(loginRequest);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.AccessToken.Should().NotBeNullOrEmpty();
-        result.Value.User.Email.Should().Be("login@example.com");
-        result.Value.User.FirstName.Should().Be("Test");
-        result.Value.User.LastName.Should().Be("User");
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.AccessToken.ShouldNotBeNullOrEmpty();
+        result.Value.User.Email.ShouldBe("login@example.com");
+        result.Value.User.FirstName.ShouldBe("Test");
+        result.Value.User.LastName.ShouldBe("User");
     }
 
     [Fact]
@@ -185,8 +185,8 @@ public class AuthServiceTests : IDisposable
         var result = await service.LoginAsync(request);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("InvalidCredentials");
+        result.IsFailure.ShouldBeTrue();
+        result.Error.Code.ShouldContain("InvalidCredentials");
     }
 
     [Fact]
@@ -213,8 +213,8 @@ public class AuthServiceTests : IDisposable
         var result = await service.LoginAsync(loginRequest);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("InvalidCredentials");
+        result.IsFailure.ShouldBeTrue();
+        result.Error.Code.ShouldContain("InvalidCredentials");
     }
 
     [Fact]
@@ -242,7 +242,7 @@ public class AuthServiceTests : IDisposable
         var result = await service.LoginAsync(loginRequest);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsSuccess.ShouldBeTrue();
     }
 
     #endregion
@@ -261,11 +261,11 @@ public class AuthServiceTests : IDisposable
         var result = await service.GetCurrentUserAsync(user.Id);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Id.Should().Be(user.Id);
-        result.Value.Email.Should().Be(user.Email);
-        result.Value.FirstName.Should().Be(user.FirstName);
-        result.Value.LastName.Should().Be(user.LastName);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Id.ShouldBe(user.Id);
+        result.Value.Email.ShouldBe(user.Email);
+        result.Value.FirstName.ShouldBe(user.FirstName);
+        result.Value.LastName.ShouldBe(user.LastName);
     }
 
     [Fact]
@@ -279,8 +279,8 @@ public class AuthServiceTests : IDisposable
         var result = await service.GetCurrentUserAsync(999);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("NotFound");
+        result.IsFailure.ShouldBeTrue();
+        result.Error.Code.ShouldContain("NotFound");
     }
 
     #endregion
@@ -303,14 +303,14 @@ public class AuthServiceTests : IDisposable
         var result = await service.RegisterAsync(request);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsSuccess.ShouldBeTrue();
 
         // Token should be a valid JWT (3 parts separated by dots)
         var tokenParts = result.Value.AccessToken.Split('.');
-        tokenParts.Should().HaveCount(3);
+        tokenParts.Length.ShouldBe(3);
 
         // TokenType should be Bearer
-        result.Value.TokenType.Should().Be("Bearer");
+        result.Value.TokenType.ShouldBe("Bearer");
     }
 
     [Fact]
@@ -336,11 +336,11 @@ public class AuthServiceTests : IDisposable
         var result = await service.LoginAsync(loginRequest);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsSuccess.ShouldBeTrue();
 
         // Token should be a valid JWT
         var tokenParts = result.Value.AccessToken.Split('.');
-        tokenParts.Should().HaveCount(3);
+        tokenParts.Length.ShouldBe(3);
     }
 
     #endregion
@@ -364,12 +364,12 @@ public class AuthServiceTests : IDisposable
 
         // Assert
         var user = context.Users.First(u => u.Email == "hash@example.com");
-        user.PasswordHash.Should().NotBe("password123");
-        user.PasswordHash.Should().NotBeNullOrEmpty();
+        user.PasswordHash.ShouldNotBe("password123");
+        user.PasswordHash.ShouldNotBeNullOrEmpty();
 
         // Password hash should be base64 encoded (contains valid base64 characters)
         var isBase64 = IsValidBase64(user.PasswordHash);
-        isBase64.Should().BeTrue();
+        isBase64.ShouldBeTrue();
     }
 
     [Fact]
@@ -397,7 +397,7 @@ public class AuthServiceTests : IDisposable
         var user2 = context.Users.First(u => u.Email == "user2@example.com");
 
         // Due to random salt, same password should produce different hashes
-        user1.PasswordHash.Should().NotBe(user2.PasswordHash);
+        user1.PasswordHash.ShouldNotBe(user2.PasswordHash);
     }
 
     private static bool IsValidBase64(string value)

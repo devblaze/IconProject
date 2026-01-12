@@ -1,8 +1,9 @@
 using System.Security.Claims;
-using FluentAssertions;
+using Shouldly;
+using IconProject.Common.Dtos;
+using IconProject.Common.Dtos.Requests.Auth;
+using IconProject.Common.Dtos.Responses.Auth;
 using IconProject.Controllers;
-using IconProject.Dtos;
-using IconProject.Dtos.Auth;
 using IconProject.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -89,11 +90,11 @@ public class AuthControllerTests
         var result = await _controller.Register(request, CancellationToken.None);
 
         // Assert
-        var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
-        createdResult.ActionName.Should().Be(nameof(AuthController.GetCurrentUser));
-        var returnedResponse = createdResult.Value.Should().BeOfType<AuthResponse>().Subject;
-        returnedResponse.AccessToken.Should().Be("jwt-token");
-        returnedResponse.User.Email.Should().Be("newuser@example.com");
+        var createdResult = result.Result.ShouldBeOfType<CreatedAtActionResult>();
+        createdResult.ActionName.ShouldBe(nameof(AuthController.GetCurrentUser));
+        var returnedResponse = createdResult.Value.ShouldBeOfType<AuthResponse>();
+        returnedResponse.AccessToken.ShouldBe("jwt-token");
+        returnedResponse.User.Email.ShouldBe("newuser@example.com");
     }
 
     [Fact]
@@ -113,8 +114,8 @@ public class AuthControllerTests
         var result = await _controller.Register(request, CancellationToken.None);
 
         // Assert
-        var objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        objectResult.StatusCode.Should().Be(409);
+        var objectResult = result.Result.ShouldBeOfType<ObjectResult>();
+        objectResult.StatusCode.ShouldBe(409);
     }
 
     [Fact]
@@ -149,13 +150,13 @@ public class AuthControllerTests
         var result = await _controller.Register(request, CancellationToken.None);
 
         // Assert
-        var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
-        var response = createdResult.Value.Should().BeOfType<AuthResponse>().Subject;
-        response.TokenType.Should().Be("Bearer");
-        response.ExpiresIn.Should().Be(3600);
-        response.User.Id.Should().Be(42);
-        response.User.FirstName.Should().Be("Test");
-        response.User.LastName.Should().Be("User");
+        var createdResult = result.Result.ShouldBeOfType<CreatedAtActionResult>();
+        var response = createdResult.Value.ShouldBeOfType<AuthResponse>();
+        response.TokenType.ShouldBe("Bearer");
+        response.ExpiresIn.ShouldBe(3600);
+        response.User.Id.ShouldBe(42);
+        response.User.FirstName.ShouldBe("Test");
+        response.User.LastName.ShouldBe("User");
     }
 
     #endregion
@@ -190,10 +191,10 @@ public class AuthControllerTests
         var result = await _controller.Login(request, CancellationToken.None);
 
         // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedResponse = okResult.Value.Should().BeOfType<AuthResponse>().Subject;
-        returnedResponse.AccessToken.Should().Be("jwt-token");
-        returnedResponse.User.Email.Should().Be("user@example.com");
+        var okResult = result.Result.ShouldBeOfType<OkObjectResult>();
+        var returnedResponse = okResult.Value.ShouldBeOfType<AuthResponse>();
+        returnedResponse.AccessToken.ShouldBe("jwt-token");
+        returnedResponse.User.Email.ShouldBe("user@example.com");
     }
 
     [Fact]
@@ -213,8 +214,8 @@ public class AuthControllerTests
         var result = await _controller.Login(request, CancellationToken.None);
 
         // Assert
-        var objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        objectResult.StatusCode.Should().Be(401);
+        var objectResult = result.Result.ShouldBeOfType<ObjectResult>();
+        objectResult.StatusCode.ShouldBe(401);
     }
 
     [Fact]
@@ -234,8 +235,8 @@ public class AuthControllerTests
         var result = await _controller.Login(request, CancellationToken.None);
 
         // Assert
-        var objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        objectResult.StatusCode.Should().Be(401);
+        var objectResult = result.Result.ShouldBeOfType<ObjectResult>();
+        objectResult.StatusCode.ShouldBe(401);
     }
 
     #endregion
@@ -262,12 +263,12 @@ public class AuthControllerTests
         var result = await _controller.GetCurrentUser(CancellationToken.None);
 
         // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedUser = okResult.Value.Should().BeOfType<UserInfo>().Subject;
-        returnedUser.Id.Should().Be(1);
-        returnedUser.Email.Should().Be("test@example.com");
-        returnedUser.FirstName.Should().Be("Test");
-        returnedUser.LastName.Should().Be("User");
+        var okResult = result.Result.ShouldBeOfType<OkObjectResult>();
+        var returnedUser = okResult.Value.ShouldBeOfType<UserInfo>();
+        returnedUser.Id.ShouldBe(1);
+        returnedUser.Email.ShouldBe("test@example.com");
+        returnedUser.FirstName.ShouldBe("Test");
+        returnedUser.LastName.ShouldBe("User");
     }
 
     [Fact]
@@ -280,7 +281,7 @@ public class AuthControllerTests
         var result = await _controller.GetCurrentUser(CancellationToken.None);
 
         // Assert
-        result.Result.Should().BeOfType<UnauthorizedResult>();
+        result.Result.ShouldBeOfType<UnauthorizedResult>();
     }
 
     [Fact]
@@ -296,8 +297,8 @@ public class AuthControllerTests
         var result = await _controller.GetCurrentUser(CancellationToken.None);
 
         // Assert
-        var objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        objectResult.StatusCode.Should().Be(404);
+        var objectResult = result.Result.ShouldBeOfType<ObjectResult>();
+        objectResult.StatusCode.ShouldBe(404);
     }
 
     [Fact]
@@ -324,7 +325,7 @@ public class AuthControllerTests
         var result = await _controller.GetCurrentUser(CancellationToken.None);
 
         // Assert
-        result.Result.Should().BeOfType<UnauthorizedResult>();
+        result.Result.ShouldBeOfType<UnauthorizedResult>();
     }
 
     #endregion
@@ -369,10 +370,10 @@ public class AuthControllerTests
         var loginResult = await _controller.Login(loginRequest, CancellationToken.None);
 
         // Assert
-        registerResult.Result.Should().BeOfType<CreatedAtActionResult>();
-        var loginOk = loginResult.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var loginResponse = loginOk.Value.Should().BeOfType<AuthResponse>().Subject;
-        loginResponse.AccessToken.Should().Be("valid-token");
+        registerResult.Result.ShouldBeOfType<CreatedAtActionResult>();
+        var loginOk = loginResult.Result.ShouldBeOfType<OkObjectResult>();
+        var loginResponse = loginOk.Value.ShouldBeOfType<AuthResponse>();
+        loginResponse.AccessToken.ShouldBe("valid-token");
     }
 
     #endregion

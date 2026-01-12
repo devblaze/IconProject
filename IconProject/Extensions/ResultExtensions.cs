@@ -1,4 +1,4 @@
-using IconProject.Dtos;
+using IconProject.Common.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IconProject.Extensions;

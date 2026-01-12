@@ -1,4 +1,4 @@
-namespace IconProject.Database.Models;
+namespace IconProject.Common.Enums;
 
 /// <summary>
 /// Represents the priority level of a task.

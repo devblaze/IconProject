@@ -5,8 +5,9 @@ using System.Text;
 using IconProject.Configuration;
 using IconProject.Database.Models;
 using IconProject.Database.UnitOfWork;
-using IconProject.Dtos;
-using IconProject.Dtos.Auth;
+using IconProject.Common.Dtos;
+using IconProject.Common.Dtos.Requests.Auth;
+using IconProject.Common.Dtos.Responses.Auth;
 using IconProject.Services.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -31,21 +32,18 @@ public class AuthService : IAuthService
         _jwtSettings = jwtSettings.Value;
         _logger = logger;
     }
-
-    /// <inheritdoc />
+    
     public async Task<Result<AuthResponse>> RegisterAsync(
         RegisterRequest request,
         CancellationToken cancellationToken = default)
     {
-        // Check if email already exists
         var emailExists = await _unitOfWork.Users.ExistsAsync(u => u.Email == request.Email.ToLowerInvariant());
         if (emailExists)
         {
             _logger.LogWarning("Registration attempted with existing email: {Email}", request.Email);
             return DomainErrors.User.EmailAlreadyExists;
         }
-
-        // Create new user
+        
         var user = new User
         {
             Email = request.Email.ToLowerInvariant(),
@@ -58,20 +56,17 @@ public class AuthService : IAuthService
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("New user registered: {Email} (ID: {UserId})", user.Email, user.Id);
-
-        // Generate token and return response
+        
         var token = GenerateJwtToken(user);
         var response = CreateAuthResponse(user, token);
 
         return Result<AuthResponse>.Success(response);
     }
-
-    /// <inheritdoc />
+    
     public async Task<Result<AuthResponse>> LoginAsync(
         LoginRequest request,
         CancellationToken cancellationToken = default)
     {
-        // Find user by email
         var users = await _unitOfWork.Users.FindAsync(u => u.Email == request.Email.ToLowerInvariant());
         var user = users.FirstOrDefault();
 
@@ -80,8 +75,7 @@ public class AuthService : IAuthService
             _logger.LogWarning("Login attempted for non-existent email: {Email}", request.Email);
             return DomainErrors.User.InvalidCredentials;
         }
-
-        // Verify password
+        
         if (!VerifyPassword(request.Password, user.PasswordHash))
         {
             _logger.LogWarning("Invalid password attempt for user: {Email}", request.Email);
@@ -89,15 +83,13 @@ public class AuthService : IAuthService
         }
 
         _logger.LogInformation("User logged in: {Email} (ID: {UserId})", user.Email, user.Id);
-
-        // Generate token and return response
+        
         var token = GenerateJwtToken(user);
         var response = CreateAuthResponse(user, token);
 
         return Result<AuthResponse>.Success(response);
     }
-
-    /// <inheritdoc />
+    
     public async Task<Result<UserInfo>> GetCurrentUserAsync(
         int userId,
         CancellationToken cancellationToken = default)

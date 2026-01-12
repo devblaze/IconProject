@@ -1,3 +1,5 @@
+using IconProject.Common.Enums;
+
 namespace IconProject.Database.Models;
 
 public class TaskEntity : BaseEntity

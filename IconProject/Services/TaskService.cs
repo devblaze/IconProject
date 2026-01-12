@@ -1,14 +1,13 @@
+using IconProject.Common.Dtos;
+using IconProject.Common.Dtos.Requests.Task;
+using IconProject.Common.Dtos.Responses.Task;
+using IconProject.Common.Enums;
 using IconProject.Database.Models;
 using IconProject.Database.UnitOfWork;
-using IconProject.Dtos;
-using IconProject.Dtos.Task;
 using IconProject.Services.Interfaces;
 
 namespace IconProject.Services;
 
-/// <summary>
-/// Service for managing task operations using Unit of Work pattern.
-/// </summary>
 public class TaskService : ITaskService
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -19,26 +18,31 @@ public class TaskService : ITaskService
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
-
-    /// <inheritdoc />
+    
     public async Task<Result<IReadOnlyList<TaskResponse>>> GetAllByUserIdAsync(
         int userId,
+        bool? isComplete = null,
+        Priority? priority = null,
         CancellationToken cancellationToken = default)
     {
-        var tasks = await _unitOfWork.Tasks.FindAsync(t => t.UserId == userId);
-        var response = tasks.Select(TaskResponse.FromEntity).ToList();
+        var tasks = await _unitOfWork.Tasks.FindAsync(t =>
+            t.UserId == userId &&
+            (!isComplete.HasValue || t.IsComplete == isComplete.Value) &&
+            (!priority.HasValue || t.Priority == priority.Value));
+        var response = tasks.Select(MapToResponse).ToList();
 
-        _logger.LogInformation("Retrieved {Count} tasks for user {UserId}", response.Count, userId);
+        _logger.LogInformation("Retrieved {Count} tasks for user {UserId} (isComplete: {IsComplete}, priority: {Priority})",
+            response.Count, userId, isComplete, priority);
 
         return Result<IReadOnlyList<TaskResponse>>.Success(response);
     }
-
-    /// <inheritdoc />
+    
     public async Task<Result<PaginatedTaskResponse>> GetPaginatedAsync(
         int userId,
         int page,
         int pageSize,
         bool? isComplete = null,
+        Priority? priority = null,
         CancellationToken cancellationToken = default)
     {
         if (page < 1) page = 1;
@@ -50,11 +54,13 @@ public class TaskService : ITaskService
         var (items, totalCount) = await _unitOfWork.Tasks.GetPaginatedAsync(
             skip,
             pageSize,
-            t => t.UserId == userId && (!isComplete.HasValue || t.IsComplete == isComplete.Value));
+            t => t.UserId == userId &&
+                 (!isComplete.HasValue || t.IsComplete == isComplete.Value) &&
+                 (!priority.HasValue || t.Priority == priority.Value));
 
         var response = new PaginatedTaskResponse
         {
-            Items = items.Select(TaskResponse.FromEntity).ToList(),
+            Items = items.Select(MapToResponse).ToList(),
             TotalCount = totalCount,
             Page = page,
             PageSize = pageSize
@@ -66,8 +72,7 @@ public class TaskService : ITaskService
 
         return Result<PaginatedTaskResponse>.Success(response);
     }
-
-    /// <inheritdoc />
+    
     public async Task<Result<TaskResponse>> GetByIdAsync(
         int id,
         int userId,
@@ -88,16 +93,14 @@ public class TaskService : ITaskService
             return DomainErrors.Task.NotOwned;
         }
 
-        return Result<TaskResponse>.Success(TaskResponse.FromEntity(task));
+        return Result<TaskResponse>.Success(MapToResponse(task));
     }
-
-    /// <inheritdoc />
+    
     public async Task<Result<TaskResponse>> CreateAsync(
         int userId,
         CreateTaskRequest request,
         CancellationToken cancellationToken = default)
     {
-        // Verify user exists
         var userExists = await _unitOfWork.Users.ExistsAsync(u => u.Id == userId);
         if (!userExists)
         {
@@ -120,10 +123,9 @@ public class TaskService : ITaskService
 
         _logger.LogInformation("Created task {TaskId} for user {UserId}", task.Id, userId);
 
-        return Result<TaskResponse>.Success(TaskResponse.FromEntity(task));
+        return Result<TaskResponse>.Success(MapToResponse(task));
     }
-
-    /// <inheritdoc />
+    
     public async Task<Result<TaskResponse>> UpdateAsync(
         int id,
         int userId,
@@ -144,8 +146,7 @@ public class TaskService : ITaskService
                 userId, id, task.UserId);
             return DomainErrors.Task.NotOwned;
         }
-
-        // Update properties
+        
         task.Title = request.Title;
         task.Description = request.Description ?? string.Empty;
         task.IsComplete = request.IsComplete;
@@ -156,10 +157,9 @@ public class TaskService : ITaskService
 
         _logger.LogInformation("Updated task {TaskId}", id);
 
-        return Result<TaskResponse>.Success(TaskResponse.FromEntity(task));
+        return Result<TaskResponse>.Success(MapToResponse(task));
     }
-
-    /// <inheritdoc />
+    
     public async Task<Result> DeleteAsync(
         int id,
         int userId,
@@ -187,8 +187,7 @@ public class TaskService : ITaskService
 
         return Result.Success();
     }
-
-    /// <inheritdoc />
+    
     public async Task<Result<TaskResponse>> ToggleCompleteAsync(
         int id,
         int userId,
@@ -214,10 +213,9 @@ public class TaskService : ITaskService
 
         _logger.LogInformation("Toggled task {TaskId} completion to {IsComplete}", id, task.IsComplete);
 
-        return Result<TaskResponse>.Success(TaskResponse.FromEntity(task));
+        return Result<TaskResponse>.Success(MapToResponse(task));
     }
-
-    /// <inheritdoc />
+    
     public async Task<Result> UpdateSortOrderAsync(
         int userId,
         IReadOnlyList<(int TaskId, int SortOrder)> sortOrders,
@@ -269,8 +267,7 @@ public class TaskService : ITaskService
             throw;
         }
     }
-
-    /// <inheritdoc />
+    
     public async Task<Result> ReorderTasksAsync(
         int userId,
         IReadOnlyList<int> taskIds,
@@ -281,11 +278,23 @@ public class TaskService : ITaskService
             return Result.Success();
         }
 
-        // Convert taskIds to sortOrders based on position in array
         var sortOrders = taskIds
             .Select((taskId, index) => (TaskId: taskId, SortOrder: index))
             .ToList();
 
         return await UpdateSortOrderAsync(userId, sortOrders, cancellationToken);
     }
+
+    private static TaskResponse MapToResponse(TaskEntity entity) => new()
+    {
+        Id = entity.Id,
+        Title = entity.Title,
+        Description = entity.Description,
+        IsComplete = entity.IsComplete,
+        Priority = entity.Priority,
+        SortOrder = entity.SortOrder,
+        UserId = entity.UserId,
+        CreatedAt = entity.CreatedAt,
+        UpdatedAt = entity.UpdatedAt
+    };
 }

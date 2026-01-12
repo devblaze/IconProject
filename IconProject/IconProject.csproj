@@ -16,7 +16,7 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.11" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.11" />
     </ItemGroup>
 
     <ItemGroup>
@@ -26,12 +26,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\IconProject.Common\IconProject.Common.csproj" />
       <ProjectReference Include="..\IconProject.Database\IconProject.Database.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="Controllers\" />
-      <Folder Include="Dtos\Mappers\" />
     </ItemGroup>
 
 </Project>
