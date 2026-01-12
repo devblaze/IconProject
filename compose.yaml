@@ -5,3 +5,9 @@
       context: .
       dockerfile: IconProject/Dockerfile
 
+  iconproject.common:
+    image: iconproject.common
+    build:
+      context: .
+      dockerfile: IconProject.Common/Dockerfile
+

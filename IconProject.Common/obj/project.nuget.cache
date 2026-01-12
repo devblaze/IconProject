@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "hyh5dfoImUo=",
+  "success": true,
+  "projectFilePath": "/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Common/IconProject.Common.csproj",
+  "expectedPackageFiles": [
+    "/Users/nickantoniadis/.nuget/packages/microsoft.extensions.configuration/9.0.11/microsoft.extensions.configuration.9.0.11.nupkg.sha512",
+    "/Users/nickantoniadis/.nuget/packages/microsoft.extensions.configuration.abstractions/9.0.11/microsoft.extensions.configuration.abstractions.9.0.11.nupkg.sha512",
+    "/Users/nickantoniadis/.nuget/packages/microsoft.extensions.configuration.binder/9.0.11/microsoft.extensions.configuration.binder.9.0.11.nupkg.sha512",
+    "/Users/nickantoniadis/.nuget/packages/microsoft.extensions.primitives/9.0.11/microsoft.extensions.primitives.9.0.11.nupkg.sha512"
+  ],
+  "logs": []
+}
