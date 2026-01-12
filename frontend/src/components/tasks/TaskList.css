@@ -1,0 +1,58 @@
+.task-list {
+  min-height: 200px;
+}
+
+.task-item {
+  margin-bottom: 0;
+}
+
+.task-item.dragging {
+  opacity: 0.8;
+}
+
+.task-item.dragging .task-card {
+  box-shadow: var(--shadow-dragging);
+  transform: rotate(2deg);
+}
+
+.task-list-loading,
+.task-list-error,
+.task-list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: var(--color-text-secondary);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border);
+  border-top: 3px solid var(--color-brand-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.task-list-error {
+  color: var(--color-accent-danger-text);
+  background-color: var(--color-accent-danger-bg);
+  border-radius: 8px;
+}
+
+.task-list-empty {
+  background-color: var(--color-bg-tertiary);
+  border-radius: 8px;
+  border: 2px dashed var(--color-border);
+}

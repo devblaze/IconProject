@@ -1,0 +1,13 @@
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Common/bin/Debug/net9.0/IconProject.Common.deps.json
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Common/bin/Debug/net9.0/IconProject.Common.dll
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Common/bin/Debug/net9.0/IconProject.Common.pdb
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Common/obj/Debug/net9.0/IconProject.Common.csproj.AssemblyReference.cache
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Common/obj/Debug/net9.0/IconProject.Common.GeneratedMSBuildEditorConfig.editorconfig
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Common/obj/Debug/net9.0/IconProject.Common.AssemblyInfoInputs.cache
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Common/obj/Debug/net9.0/IconProject.Common.AssemblyInfo.cs
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Common/obj/Debug/net9.0/IconProject.Common.csproj.CoreCompileInputs.cache
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Common/obj/Debug/net9.0/IconProject.Common.sourcelink.json
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Common/obj/Debug/net9.0/IconProject.Common.dll
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Common/obj/Debug/net9.0/refint/IconProject.Common.dll
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Common/obj/Debug/net9.0/IconProject.Common.pdb
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Common/obj/Debug/net9.0/ref/IconProject.Common.dll

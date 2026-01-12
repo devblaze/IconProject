@@ -1,0 +1,129 @@
+/* CSS Variables for Theming */
+:root {
+  /* Light theme (default) */
+  --color-bg-primary: #f5f7fa;
+  --color-bg-secondary: #ffffff;
+  --color-bg-tertiary: #f8f9fa;
+  --color-bg-hover: #f0f0f0;
+  --color-bg-card: #ffffff;
+  --color-bg-input: #ffffff;
+  --color-bg-modal-overlay: rgba(0, 0, 0, 0.5);
+
+  --color-text-primary: #333333;
+  --color-text-secondary: #666666;
+  --color-text-muted: #888888;
+  --color-text-inverse: #ffffff;
+
+  --color-border: #dddddd;
+  --color-border-light: #eeeeee;
+  --color-border-focus: #1a1a2e;
+
+  --color-brand-primary: #1a1a2e;
+  --color-brand-primary-hover: #2d2d4a;
+  --color-brand-secondary: #16213e;
+
+  --color-accent-danger: #e94560;
+  --color-accent-danger-bg: #ffebee;
+  --color-accent-danger-hover: #ffcdd2;
+  --color-accent-danger-text: #d32f2f;
+
+  --color-accent-success: #4caf50;
+  --color-accent-success-bg: #e8f5e9;
+
+  --color-accent-info: #1976d2;
+  --color-accent-info-bg: #e3f2fd;
+  --color-accent-info-hover: #bbdefb;
+
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.2);
+  --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-card-hover: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-dragging: 0 8px 16px rgba(0, 0, 0, 0.15);
+
+  --transition-fast: 0.2s;
+  --transition-normal: 0.3s;
+}
+
+[data-theme="dark"] {
+  --color-bg-primary: #121212;
+  --color-bg-secondary: #1e1e1e;
+  --color-bg-tertiary: #2d2d2d;
+  --color-bg-hover: #3d3d3d;
+  --color-bg-card: #1e1e1e;
+  --color-bg-input: #2d2d2d;
+  --color-bg-modal-overlay: rgba(0, 0, 0, 0.7);
+
+  --color-text-primary: #e0e0e0;
+  --color-text-secondary: #b0b0b0;
+  --color-text-muted: #808080;
+  --color-text-inverse: #121212;
+
+  --color-border: #404040;
+  --color-border-light: #333333;
+  --color-border-focus: #6366f1;
+
+  --color-brand-primary: #6366f1;
+  --color-brand-primary-hover: #818cf8;
+  --color-brand-secondary: #4f46e5;
+
+  --color-accent-danger: #f87171;
+  --color-accent-danger-bg: #3d1f1f;
+  --color-accent-danger-hover: #5c2c2c;
+  --color-accent-danger-text: #fca5a5;
+
+  --color-accent-success: #4ade80;
+  --color-accent-success-bg: #1f3d1f;
+
+  --color-accent-info: #60a5fa;
+  --color-accent-info-bg: #1f2d3d;
+  --color-accent-info-hover: #2d3d4d;
+
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-dragging: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+.loading-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-primary);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border);
+  border-top: 3px solid var(--color-brand-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

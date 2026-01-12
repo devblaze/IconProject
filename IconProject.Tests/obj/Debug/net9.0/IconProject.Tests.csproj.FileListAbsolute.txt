@@ -1,0 +1,12 @@
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Tests/bin/Debug/net9.0/IconProject.Tests.deps.json
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Tests/bin/Debug/net9.0/IconProject.Tests.dll
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Tests/bin/Debug/net9.0/IconProject.Tests.pdb
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Tests/obj/Debug/net9.0/IconProject.Tests.GeneratedMSBuildEditorConfig.editorconfig
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Tests/obj/Debug/net9.0/IconProject.Tests.AssemblyInfoInputs.cache
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Tests/obj/Debug/net9.0/IconProject.Tests.AssemblyInfo.cs
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Tests/obj/Debug/net9.0/IconProject.Tests.csproj.CoreCompileInputs.cache
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Tests/obj/Debug/net9.0/IconProject.Tests.sourcelink.json
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Tests/obj/Debug/net9.0/IconProject.Tests.dll
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Tests/obj/Debug/net9.0/refint/IconProject.Tests.dll
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Tests/obj/Debug/net9.0/IconProject.Tests.pdb
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject.Tests/obj/Debug/net9.0/ref/IconProject.Tests.dll
