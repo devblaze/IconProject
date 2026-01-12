@@ -39,25 +39,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (data: LoginDto) => {
     const response = await authApi.login(data);
     localStorage.setItem('token', response.token);
-    const userData: User = {
-      email: response.email,
-      firstName: response.firstName,
-      lastName: response.lastName,
-    };
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(response.user));
+    setUser(response.user);
   };
 
   const register = async (data: RegisterDto) => {
     const response = await authApi.register(data);
     localStorage.setItem('token', response.token);
-    const userData: User = {
-      email: response.email,
-      firstName: response.firstName,
-      lastName: response.lastName,
-    };
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(response.user));
+    setUser(response.user);
   };
 
   const logout = () => {

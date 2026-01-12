@@ -1,8 +1,11 @@
 namespace IconProject.Database.Models;
 
-public enum Status
+/// <summary>
+/// Represents the priority level of a task.
+/// </summary>
+public enum Priority
 {
-    Low = 1,
-    Normal = 2,
-    High = 3,
+    Low = 0,
+    Medium = 1,
+    High = 2
 }

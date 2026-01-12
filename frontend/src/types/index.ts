@@ -11,6 +11,7 @@ export interface Task {
   isComplete: boolean;
   priority: Priority;
   sortOrder: number;
+  userId: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -26,20 +27,29 @@ export interface UpdateTaskDto {
   description?: string;
   isComplete: boolean;
   priority: Priority;
+  sortOrder?: number;
 }
 
 export interface User {
+  id: number;
   email: string;
   firstName?: string;
   lastName?: string;
 }
 
+// Backend returns this format
+export interface BackendAuthResponse {
+  accessToken: string;
+  tokenType: string;
+  expiresIn: number;
+  user: User;
+}
+
+// Internal auth response used by the app
 export interface AuthResponse {
   token: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  expiresAt: string;
+  user: User;
+  expiresIn: number;
 }
 
 export interface LoginDto {

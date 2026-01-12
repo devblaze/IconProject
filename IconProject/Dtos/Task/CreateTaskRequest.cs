@@ -22,9 +22,9 @@ public sealed record CreateTaskRequest
     public string? Description { get; init; }
 
     /// <summary>
-    /// The priority/status of the task.
+    /// The priority of the task (Low=0, Medium=1, High=2).
     /// </summary>
-    public Status Status { get; init; } = Status.Normal;
+    public Priority Priority { get; init; } = Priority.Medium;
 
     /// <summary>
     /// Optional sort order for drag-and-drop functionality.

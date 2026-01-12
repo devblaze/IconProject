@@ -52,4 +52,9 @@ public interface ITaskService
     /// Updates the sort order of multiple tasks (for drag-and-drop).
     /// </summary>
     Task<Result> UpdateSortOrderAsync(int userId, IReadOnlyList<(int TaskId, int SortOrder)> sortOrders, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Reorders tasks based on the order of task IDs provided (for drag-and-drop).
+    /// </summary>
+    Task<Result> ReorderTasksAsync(int userId, IReadOnlyList<int> taskIds, CancellationToken cancellationToken = default);
 }

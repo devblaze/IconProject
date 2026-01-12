@@ -109,7 +109,7 @@ public class TaskService : ITaskService
         {
             Title = request.Title,
             Description = request.Description ?? string.Empty,
-            Status = request.Status,
+            Priority = request.Priority,
             SortOrder = request.SortOrder,
             IsComplete = false,
             UserId = userId
@@ -149,7 +149,7 @@ public class TaskService : ITaskService
         task.Title = request.Title;
         task.Description = request.Description ?? string.Empty;
         task.IsComplete = request.IsComplete;
-        task.Status = request.Status;
+        task.Priority = request.Priority;
         task.SortOrder = request.SortOrder;
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -268,5 +268,24 @@ public class TaskService : ITaskService
             await _unitOfWork.RollbackTransactionAsync(cancellationToken);
             throw;
         }
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> ReorderTasksAsync(
+        int userId,
+        IReadOnlyList<int> taskIds,
+        CancellationToken cancellationToken = default)
+    {
+        if (taskIds.Count == 0)
+        {
+            return Result.Success();
+        }
+
+        // Convert taskIds to sortOrders based on position in array
+        var sortOrders = taskIds
+            .Select((taskId, index) => (TaskId: taskId, SortOrder: index))
+            .ToList();
+
+        return await UpdateSortOrderAsync(userId, sortOrders, cancellationToken);
     }
 }

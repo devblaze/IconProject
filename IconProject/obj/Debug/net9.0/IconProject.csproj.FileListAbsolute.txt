@@ -164,3 +164,4 @@
 /Users/nickantoniadis/Documents/Repositories/IconProject/IconProject/obj/Debug/net9.0/IconProject.pdb
 /Users/nickantoniadis/Documents/Repositories/IconProject/IconProject/obj/Debug/net9.0/IconProject.genruntimeconfig.cache
 /Users/nickantoniadis/Documents/Repositories/IconProject/IconProject/obj/Debug/net9.0/ref/IconProject.dll
+/Users/nickantoniadis/Documents/Repositories/IconProject/IconProject/bin/Debug/net9.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll

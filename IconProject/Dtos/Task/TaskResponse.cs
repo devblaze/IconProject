@@ -11,7 +11,7 @@ public sealed record TaskResponse
     public required string Title { get; init; }
     public string? Description { get; init; }
     public bool IsComplete { get; init; }
-    public Status Status { get; init; }
+    public Priority Priority { get; init; }
     public int SortOrder { get; init; }
     public int UserId { get; init; }
     public DateTime CreatedAt { get; init; }
@@ -28,7 +28,7 @@ public sealed record TaskResponse
             Title = entity.Title,
             Description = entity.Description,
             IsComplete = entity.IsComplete,
-            Status = entity.Status,
+            Priority = entity.Priority,
             SortOrder = entity.SortOrder,
             UserId = entity.UserId,
             CreatedAt = entity.CreatedAt,

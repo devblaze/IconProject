@@ -29,7 +29,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasKey(t => t.Id);
             entity.Property(t => t.Title).IsRequired().HasMaxLength(200);
             entity.Property(t => t.Description).HasMaxLength(2000);
-            entity.Property(t => t.Status).HasConversion<int>();
+            entity.Property(t => t.Priority).HasConversion<int>();
 
             entity.HasOne(t => t.User)
                 .WithMany(u => u.Tasks)
