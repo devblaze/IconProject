@@ -1,4 +1,58 @@
+# Build results
+bin/
+obj/
+out/
 
-.idea/.idea.IconProject/.idea/
+# NuGet
+*.nupkg
+.nuget/
+packages/
 
-.idea/.idea.IconProject/Docker/
+# IDE
+.idea/
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider
+*.sln.iml
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+appsettings.Development.json
+appsettings.Local.json
+
+# Node.js (frontend)
+node_modules/
+dist/
+.npm/
+
+# Test results
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
