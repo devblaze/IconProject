@@ -61,10 +61,38 @@
 @media (max-width: 600px) {
   .task-filters {
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.25rem;
   }
 
   .filter-group {
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .filter-group label {
+    font-size: 0.95rem;
+  }
+
+  .filter-buttons {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .filter-btn {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.9rem;
+    min-height: 44px;
+    text-align: center;
+  }
+
+  .filter-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    min-height: 44px;
   }
 }

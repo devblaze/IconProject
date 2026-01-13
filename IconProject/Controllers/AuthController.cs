@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using IconProject.Common.Dtos.Requests.Auth;
 using IconProject.Common.Dtos.Responses.Auth;
 using IconProject.Extensions;
@@ -11,7 +10,7 @@ namespace IconProject.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class AuthController : ControllerBase
+public class AuthController : AuthorizedControllerBase
 {
     private readonly IAuthService _authService;
 
@@ -19,7 +18,7 @@ public class AuthController : ControllerBase
     {
         _authService = authService;
     }
-    
+
     [HttpPost("register")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status201Created)]
@@ -35,7 +34,7 @@ public class AuthController : ControllerBase
             onSuccess: response => CreatedAtAction(nameof(GetCurrentUser), response),
             onFailure: _ => result.ToActionResult(Request.Path));
     }
-    
+
     [HttpPost("login")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
@@ -49,33 +48,13 @@ public class AuthController : ControllerBase
         return result.ToActionResult(Request.Path);
     }
 
-    // Gets the current authenticated user's information.
     [HttpGet("me")]
     [Authorize]
     [ProducesResponseType(typeof(UserInfo), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<UserInfo>> GetCurrentUser(CancellationToken cancellationToken)
     {
-        var userId = GetUserIdFromClaims();
-        if (userId is null)
-        {
-            return Unauthorized();
-        }
-
-        var result = await _authService.GetCurrentUserAsync(userId.Value, cancellationToken);
+        var result = await _authService.GetCurrentUserAsync(GetUserId(), cancellationToken);
         return result.ToActionResult(Request.Path);
-    }
-
-    private int? GetUserIdFromClaims()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                       ?? User.FindFirst("sub")?.Value;
-
-        if (int.TryParse(userIdClaim, out var userId))
-        {
-            return userId;
-        }
-
-        return null;
     }
 }

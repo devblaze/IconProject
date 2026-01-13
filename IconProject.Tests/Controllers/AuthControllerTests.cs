@@ -272,16 +272,16 @@ public class AuthControllerTests
     }
 
     [Fact]
-    public async Task GetCurrentUser_WithUnauthenticatedUser_ReturnsUnauthorized()
+    public async Task GetCurrentUser_WithUnauthenticatedUser_ThrowsUnauthorizedAccessException()
     {
         // Arrange
         // Default context has no user claims
 
-        // Act
-        var result = await _controller.GetCurrentUser(CancellationToken.None);
-
-        // Assert
-        result.Result.ShouldBeOfType<UnauthorizedResult>();
+        // Act & Assert
+        // Note: In production, the [Authorize] attribute prevents unauthenticated access.
+        // This test verifies the fallback behavior when claims are missing.
+        await Should.ThrowAsync<UnauthorizedAccessException>(
+            () => _controller.GetCurrentUser(CancellationToken.None));
     }
 
     [Fact]
@@ -302,7 +302,7 @@ public class AuthControllerTests
     }
 
     [Fact]
-    public async Task GetCurrentUser_WithInvalidClaimFormat_ReturnsUnauthorized()
+    public async Task GetCurrentUser_WithInvalidClaimFormat_ThrowsUnauthorizedAccessException()
     {
         // Arrange
         var claims = new List<Claim>
@@ -321,11 +321,10 @@ public class AuthControllerTests
             HttpContext = httpContext
         };
 
-        // Act
-        var result = await _controller.GetCurrentUser(CancellationToken.None);
-
-        // Assert
-        result.Result.ShouldBeOfType<UnauthorizedResult>();
+        // Act & Assert
+        // This test verifies that invalid claim formats are properly rejected.
+        await Should.ThrowAsync<UnauthorizedAccessException>(
+            () => _controller.GetCurrentUser(CancellationToken.None));
     }
 
     #endregion

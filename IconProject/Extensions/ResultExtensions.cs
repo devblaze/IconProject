@@ -3,15 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IconProject.Extensions;
 
-/// <summary>
-/// Extension methods for converting Result types to ActionResult responses.
-/// </summary>
 public static class ResultExtensions
 {
-    /// <summary>
-    /// Converts a Result&lt;T&gt; to an ActionResult.
-    /// Returns 200 OK with the value on success, or an appropriate error response on failure.
-    /// </summary>
     public static ActionResult<T> ToActionResult<T>(this Result<T> result, string? path = null)
     {
         if (result.IsSuccess)
@@ -21,10 +14,7 @@ public static class ResultExtensions
 
         return ToErrorActionResult<T>(result.Error, path);
     }
-
-    /// <summary>
-    /// Converts a Result&lt;T&gt; to an ActionResult with a custom success status code.
-    /// </summary>
+    
     public static ActionResult<T> ToActionResult<T>(this Result<T> result, int successStatusCode, string? path = null)
     {
         if (result.IsSuccess)
@@ -34,10 +24,7 @@ public static class ResultExtensions
 
         return ToErrorActionResult<T>(result.Error, path);
     }
-
-    /// <summary>
-    /// Converts a Result&lt;T&gt; to a Created ActionResult (201).
-    /// </summary>
+    
     public static ActionResult<T> ToCreatedResult<T>(this Result<T> result, string location, string? path = null)
     {
         if (result.IsSuccess)
@@ -47,10 +34,7 @@ public static class ResultExtensions
 
         return ToErrorActionResult<T>(result.Error, path);
     }
-
-    /// <summary>
-    /// Converts a Result&lt;T&gt; to a CreatedAtAction ActionResult (201).
-    /// </summary>
+    
     public static ActionResult<T> ToCreatedAtActionResult<T>(
         this Result<T> result,
         string actionName,
@@ -65,11 +49,7 @@ public static class ResultExtensions
 
         return ToErrorActionResult<T>(result.Error, path);
     }
-
-    /// <summary>
-    /// Converts a Result (non-generic) to an ActionResult.
-    /// Returns 204 No Content on success, or an appropriate error response on failure.
-    /// </summary>
+    
     public static IActionResult ToActionResult(this Result result, string? path = null)
     {
         if (result.IsSuccess)
@@ -79,10 +59,7 @@ public static class ResultExtensions
 
         return ToErrorActionResult(result.Error, path);
     }
-
-    /// <summary>
-    /// Converts a Result (non-generic) to an ActionResult with a custom success status code.
-    /// </summary>
+    
     public static IActionResult ToActionResult(this Result result, int successStatusCode, string? path = null)
     {
         if (result.IsSuccess)
@@ -108,13 +85,9 @@ public static class ResultExtensions
 
         return new ObjectResult(errorResponse) { StatusCode = statusCode };
     }
-
-    /// <summary>
-    /// Maps error codes to HTTP status codes.
-    /// </summary>
+    
     private static int GetStatusCodeFromError(Error error)
     {
-        // Map based on error code prefix
         return error.Code.Split('.')[0] switch
         {
             "Validation" => StatusCodes.Status400BadRequest,
@@ -132,41 +105,5 @@ public static class ResultExtensions
                 _ => StatusCodes.Status400BadRequest
             }
         };
-    }
-}
-
-/// <summary>
-/// Extension methods for async Result operations.
-/// </summary>
-public static class ResultAsyncExtensions
-{
-    /// <summary>
-    /// Converts an async Result&lt;T&gt; to an ActionResult.
-    /// </summary>
-    public static async Task<ActionResult<T>> ToActionResultAsync<T>(this Task<Result<T>> resultTask, string? path = null)
-    {
-        var result = await resultTask;
-        return result.ToActionResult(path);
-    }
-
-    /// <summary>
-    /// Converts an async Result to an ActionResult.
-    /// </summary>
-    public static async Task<IActionResult> ToActionResultAsync(this Task<Result> resultTask, string? path = null)
-    {
-        var result = await resultTask;
-        return result.ToActionResult(path);
-    }
-
-    /// <summary>
-    /// Converts an async Result&lt;T&gt; to a Created ActionResult.
-    /// </summary>
-    public static async Task<ActionResult<T>> ToCreatedResultAsync<T>(
-        this Task<Result<T>> resultTask,
-        string location,
-        string? path = null)
-    {
-        var result = await resultTask;
-        return result.ToCreatedResult(location, path);
     }
 }

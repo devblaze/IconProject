@@ -104,16 +104,16 @@ public class TasksControllerTests
     }
 
     [Fact]
-    public async Task GetAll_WithUnauthenticatedUser_ReturnsUnauthorized()
+    public async Task GetAll_WithUnauthenticatedUser_ThrowsUnauthorizedAccessException()
     {
         // Arrange
         SetupUnauthenticatedContext();
 
-        // Act
-        var result = await _controller.GetAll(null, null, CancellationToken.None);
-
-        // Assert
-        result.Result.ShouldBeOfType<UnauthorizedResult>();
+        // Act & Assert
+        // Note: In production, the [Authorize] attribute prevents unauthenticated access.
+        // This test verifies the fallback behavior when claims are missing.
+        await Should.ThrowAsync<UnauthorizedAccessException>(
+            () => _controller.GetAll(null, null, CancellationToken.None));
     }
 
     [Fact]
@@ -235,17 +235,17 @@ public class TasksControllerTests
     }
 
     [Fact]
-    public async Task Create_WithUnauthenticatedUser_ReturnsUnauthorized()
+    public async Task Create_WithUnauthenticatedUser_ThrowsUnauthorizedAccessException()
     {
         // Arrange
         SetupUnauthenticatedContext();
         var request = new CreateTaskRequest { Title = "New Task" };
 
-        // Act
-        var result = await _controller.Create(request, CancellationToken.None);
-
-        // Assert
-        result.Result.ShouldBeOfType<UnauthorizedResult>();
+        // Act & Assert
+        // Note: In production, the [Authorize] attribute prevents unauthenticated access.
+        // This test verifies the fallback behavior when claims are missing.
+        await Should.ThrowAsync<UnauthorizedAccessException>(
+            () => _controller.Create(request, CancellationToken.None));
     }
 
     #endregion

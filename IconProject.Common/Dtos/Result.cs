@@ -1,9 +1,5 @@
 namespace IconProject.Common.Dtos;
 
-/// <summary>
-/// Represents the result of an operation that can either succeed or fail.
-/// </summary>
-/// <typeparam name="T">The type of the value on success.</typeparam>
 public sealed class Result<T>
 {
     private readonly T? _value;
@@ -49,9 +45,6 @@ public sealed class Result<T>
         => IsSuccess ? await onSuccess(_value!) : await onFailure(_error!);
 }
 
-/// <summary>
-/// Represents the result of an operation that can either succeed (with no value) or fail.
-/// </summary>
 public sealed class Result
 {
     private readonly Error? _error;
@@ -84,9 +77,6 @@ public sealed class Result
         => IsSuccess ? onSuccess() : onFailure(_error!);
 }
 
-/// <summary>
-/// Represents an error with a code and description.
-/// </summary>
 public sealed record Error(string Code, string Description)
 {
     public static readonly Error None = new(string.Empty, string.Empty);
@@ -107,9 +97,6 @@ public sealed record Error(string Code, string Description)
         new("Unauthorized.Error", description);
 }
 
-/// <summary>
-/// Domain-specific errors for the application.
-/// </summary>
 public static class DomainErrors
 {
     public static class User

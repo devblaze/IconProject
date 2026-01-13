@@ -115,10 +115,50 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+    padding: 1rem;
+  }
+
+  .task-card-left {
+    width: 100%;
+  }
+
+  .task-checkbox {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+  }
+
+  .task-title {
+    font-size: 1.1rem;
+  }
+
+  .task-description {
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
   }
 
   .task-card-right {
     width: 100%;
     justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .priority-badge {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .task-actions {
+    gap: 0.5rem;
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .btn-edit,
+  .btn-delete {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    min-height: 44px;
+    min-width: 70px;
   }
 }

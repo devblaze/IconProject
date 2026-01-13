@@ -225,8 +225,7 @@ public class TaskService : ITaskService
         {
             return Result.Success();
         }
-
-        // Use transaction for batch update
+        
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
         try

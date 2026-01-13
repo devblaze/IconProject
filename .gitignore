@@ -5,8 +5,10 @@ out/
 
 # NuGet
 *.nupkg
-.nuget/
-packages/
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
 
 # IDE - Visual Studio
 .vs/

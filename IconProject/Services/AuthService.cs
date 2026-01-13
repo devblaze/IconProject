@@ -14,9 +14,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace IconProject.Services;
 
-/// <summary>
-/// Service for handling authentication operations including registration, login, and JWT token generation.
-/// </summary>
 public class AuthService : IAuthService
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -153,7 +150,6 @@ public class AuthService : IAuthService
 
     private static string HashPassword(string password)
     {
-        // Using PBKDF2 with SHA256
         const int iterations = 100000;
         const int saltSize = 16;
         const int hashSize = 32;
@@ -166,7 +162,6 @@ public class AuthService : IAuthService
             HashAlgorithmName.SHA256,
             hashSize);
 
-        // Combine salt and hash: [salt][hash]
         byte[] hashBytes = new byte[saltSize + hashSize];
         Array.Copy(salt, 0, hashBytes, 0, saltSize);
         Array.Copy(hash, 0, hashBytes, saltSize, hashSize);
@@ -182,11 +177,9 @@ public class AuthService : IAuthService
 
         byte[] hashBytes = Convert.FromBase64String(storedHash);
 
-        // Extract salt from stored hash
         byte[] salt = new byte[saltSize];
         Array.Copy(hashBytes, 0, salt, 0, saltSize);
 
-        // Compute hash with provided password and extracted salt
         byte[] computedHash = Rfc2898DeriveBytes.Pbkdf2(
             password,
             salt,
@@ -194,7 +187,6 @@ public class AuthService : IAuthService
             HashAlgorithmName.SHA256,
             hashSize);
 
-        // Compare computed hash with stored hash
         for (int i = 0; i < hashSize; i++)
         {
             if (hashBytes[saltSize + i] != computedHash[i])

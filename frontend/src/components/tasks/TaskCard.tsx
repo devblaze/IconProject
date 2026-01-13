@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTasks } from '../../hooks/useTasks';
 import { Priority, type Task } from '../../types';
+import ConfirmModal from '../common/ConfirmModal';
 import './TaskCard.css';
 
 interface TaskCardProps {
@@ -23,6 +24,7 @@ const priorityColors: Record<Priority, string> = {
 const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit }) => {
   const { updateTask, deleteTask } = useTasks();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleToggleComplete = async () => {
     await updateTask(task.id, {
@@ -33,15 +35,22 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit }) => {
     });
   };
 
-  const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      setIsDeleting(true);
-      try {
-        await deleteTask(task.id);
-      } finally {
-        setIsDeleting(false);
-      }
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteTask(task.id);
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
   };
 
   return (
@@ -70,15 +79,27 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit }) => {
             Edit
           </button>
           <button
-            onClick={handleDelete}
+            onClick={handleDeleteClick}
             className="btn-delete"
             disabled={isDeleting}
             title="Delete"
           >
-            {isDeleting ? '...' : 'Delete'}
+            Delete
           </button>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        title="Delete Task"
+        message={`Are you sure you want to delete "${task.title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        isLoading={isDeleting}
+        variant="danger"
+      />
     </div>
   );
 };

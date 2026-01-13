@@ -2,9 +2,6 @@ using System.Net;
 
 namespace IconProject.Common.Dtos;
 
-/// <summary>
-/// Standard error response returned by the API.
-/// </summary>
 public sealed record ErrorResponse
 {
     public required string Code { get; init; }

@@ -53,7 +53,14 @@
     gap: 1rem;
   }
 
+  .dashboard-header h2 {
+    font-size: 1.35rem;
+  }
+
   .btn-add-task {
     width: 100%;
+    padding: 1rem 1.5rem;
+    font-size: 1.05rem;
+    min-height: 50px;
   }
 }

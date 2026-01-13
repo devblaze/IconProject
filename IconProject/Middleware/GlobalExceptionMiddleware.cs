@@ -5,9 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IconProject.Middleware;
 
-/// <summary>
-/// Middleware for handling exceptions globally and returning consistent error responses.
-/// </summary>
 public class GlobalExceptionMiddleware
 {
     private readonly RequestDelegate _next;
@@ -183,7 +180,6 @@ public class GlobalExceptionMiddleware
     }
 }
 
-// Extension methods for registering the GlobalExceptionMiddleware adds middleware to the Program.cs.
 public static class GlobalExceptionMiddlewareExtensions
 {
     public static IApplicationBuilder UseGlobalExceptionHandler(this IApplicationBuilder app)

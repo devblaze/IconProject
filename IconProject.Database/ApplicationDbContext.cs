@@ -11,8 +11,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
-        // User configuration
+        
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(u => u.Id);
@@ -22,8 +21,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(u => u.FirstName).HasMaxLength(100);
             entity.Property(u => u.LastName).HasMaxLength(100);
         });
-
-        // TaskItem configuration
+        
         modelBuilder.Entity<TaskEntity>(entity =>
         {
             entity.HasKey(t => t.Id);

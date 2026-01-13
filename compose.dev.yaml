@@ -20,7 +20,7 @@ services:
       - ./IconProject.Database:/src/IconProject.Database
       - ./IconProject.Common:/src/IconProject.Common
       - ./IconProject.sln:/src/IconProject.sln
-      - sqlite-data-dev:/src/data
+      - sqlite-data:/src/data
     command: dotnet watch run --project IconProject/IconProject.csproj --no-launch-profile
     networks:
       - taskmanagement-network-dev
@@ -45,7 +45,7 @@ services:
       - taskmanagement-network-dev
 
 volumes:
-  sqlite-data-dev:
+  sqlite-data:
 
 networks:
   taskmanagement-network-dev:

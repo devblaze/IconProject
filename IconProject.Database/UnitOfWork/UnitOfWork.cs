@@ -6,45 +6,36 @@ using IconProject.Database.Repositories.Interfaces;
 
 namespace IconProject.Database.UnitOfWork;
 
-/// <summary>
-/// Implementation of the Unit of Work pattern that coordinates changes across
-/// multiple repositories and manages database transactions.
-/// </summary>
 public class UnitOfWork : IUnitOfWork
 {
     private readonly ApplicationDbContext _context;
     private IDbContextTransaction? _transaction;
     private bool _disposed;
 
-    private IGenericRepository<User>? _users;
-    private IGenericRepository<TaskEntity>? _tasks;
+    private readonly Lazy<IGenericRepository<User>> _users;
+    private readonly Lazy<IGenericRepository<TaskEntity>> _tasks;
 
     public UnitOfWork(ApplicationDbContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
+        _users = new Lazy<IGenericRepository<User>>(() => new GenericRepository<User>(_context));
+        _tasks = new Lazy<IGenericRepository<TaskEntity>>(() => new GenericRepository<TaskEntity>(_context));
     }
 
-    /// <inheritdoc />
-    public IGenericRepository<User> Users =>
-        _users ??= new GenericRepository<User>(_context);
+    public IGenericRepository<User> Users => _users.Value;
 
-    /// <inheritdoc />
-    public IGenericRepository<TaskEntity> Tasks =>
-        _tasks ??= new GenericRepository<TaskEntity>(_context);
+    public IGenericRepository<TaskEntity> Tasks => _tasks.Value;
 
-    /// <inheritdoc />
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return await _context.SaveChangesAsync(cancellationToken);
     }
-
-    /// <inheritdoc />
+    
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
         _transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
     }
-
-    /// <inheritdoc />
+    
     public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
     {
         if (_transaction == null)
@@ -68,8 +59,7 @@ public class UnitOfWork : IUnitOfWork
             _transaction = null;
         }
     }
-
-    /// <inheritdoc />
+    
     public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
     {
         if (_transaction == null)
